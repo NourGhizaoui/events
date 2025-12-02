@@ -1,12 +1,53 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Organisator Dashboard</title>
+    <title>Dashboard Organisateur</title>
 </head>
 <body>
-<h1>Welcome, <span th:text="${username}">Organisator</span>!</h1>
-<p>This is the organisator dashboard.</p>
-<p>Status: Waiting for admin approval</p>
-<a href="/auth/logout">Logout</a>
+<h1>Dashboard Organisateur</h1>
+
+<h2>Statistiques</h2>
+<ul>
+    <li>Total Events: <span th:text="${totalEvents}"></span></li>
+    <li>Pending Events: <span th:text="${pendingEvents}"></span></li>
+    <li>Approved Events: <span th:text="${approvedEvents}"></span></li>
+    <li>Past Events: <span th:text="${pastEvents}"></span></li>
+</ul>
+
+<h2>Liste des événements</h2>
+<a href="/organisator/event/new">Créer un nouvel événement</a>
+<table border="1">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Date</th>
+            <th>Location</th>
+            <th>Capacity</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="event : ${events}">
+            <td th:text="${event.id}"></td>
+            <td th:text="${event.title}"></td>
+            <td th:text="${event.description}"></td>
+            <td th:text="${#temporals.format(event.eventDate, 'yyyy-MM-dd HH:mm')}"></td>
+            <td th:text="${event.location}"></td>
+            <td th:text="${event.capacity}"></td>
+            <td th:text="${event.status}"></td>
+            <td>
+                <a th:href="@{/organisator/event/edit/{id}(id=${event.id})}">Edit</a>
+                <form th:action="@{/organisator/event/delete/{id}(id=${event.id})}" method="post" style="display:inline">
+                    <button type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<a href="/">Retour</a>
 </body>
 </html>

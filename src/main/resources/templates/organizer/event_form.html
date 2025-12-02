@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Event Form</title>
+</head>
+<body>
+<h1 th:text="${event.id == null} ? 'Créer un événement' : 'Éditer l\'événement'"></h1>
+
+<form th:action="@{/organisator/event/save}" th:object="${event}" method="post">
+    <input type="hidden" th:field="*{id}"/>
+    <label>Title: <input type="text" th:field="*{title}" required/></label><br/>
+    <label>Description: <textarea th:field="*{description}" required></textarea></label><br/>
+    <label>Date: <input type="datetime-local" th:field="*{eventDate}" required/></label><br/>
+    <label>Location: <input type="text" th:field="*{location}" required/></label><br/>
+    <label>Capacity: <input type="number" th:field="*{capacity}" required/></label><br/>
+    <label>Status:
+        <select th:field="*{status}">
+            <option th:value="PENDING" th:text="'PENDING'"></option>
+            <option th:value="APPROVED" th:text="'APPROVED'"></option>
+            <option th:value="CANCELLED" th:text="'CANCELLED'"></option>
+        </select>
+    </label><br/>
+    <button type="submit">Save</button>
+</form>
+
+<a href="/organisator/dashboard">Retour au dashboard</a>
+</body>
+</html>

@@ -113,4 +113,23 @@ public String getRolesAsString() {
 
 
 
+@Transient
+public String getRoleSimple() {
+    if (roles.stream().anyMatch(r -> r.getName().name().equals("USER"))) {
+        return "USER";
+    } else if (roles.stream().anyMatch(r -> r.getName().name().equals("ORGANISATOR"))) {
+        return "ORGANISATOR";
+    }
+    return "";
+}
+@Transient
+public String getFilteredRoles() {
+    return roles.stream()
+                .map(r -> r.getName().name()) // récupère le nom exact de l'enum
+                .filter(n -> n.equals("ROLE_USER") || n.equals("ROLE_ORGANISATOR")) // filtrer seulement USER et ORGANISATOR
+                .map(n -> n.replace("ROLE_", "")) // pour afficher juste USER ou ORGANISATOR
+                .collect(Collectors.joining(", "));
+}
+
+
 }

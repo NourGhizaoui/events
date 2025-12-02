@@ -51,9 +51,9 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+    protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        // Ignorer les pages Thymeleaf et ressources statiques
-        return path.startsWith("/auth") || path.startsWith("/css") || path.startsWith("/js");
+        return !path.startsWith("/api"); // JWT UNIQUEMENT pour API !
     }
+
 }

@@ -1,78 +1,97 @@
 package com.example.plevent.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @Configuration
 @EnableMethodSecurity
 public class WebSecurityConfig {
 
     @Autowired
-    private UserDetailsServiceImpl userDetailsService;
+    private AuthTokenFilter authTokenFilter; // JWT
 
     @Autowired
-    private AuthEntryPointJwt unauthorizedHandler;
+    private CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 
+    
     @Autowired
-    private CustomAuthenticationSuccessHandler successHandler;
-
-    @Bean
-    public AuthTokenFilter authenticationJwtTokenFilter() {
-        return new AuthTokenFilter();
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
-        return authConfig.getAuthenticationManager();
-    }
+    private AuthEntryPointJwt unauthorizedHandler; // 401 JSON pour API
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    // AuthenticationManager pour login
     @Bean
-    public SecurityFilterChain filterChain(org.springframework.security.config.annotation.web.builders.HttpSecurity http) throws Exception {
-        http
-            .csrf(csrf -> csrf.disable())
-            .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                // Pages Thymeleaf accessibles à tous
-                .requestMatchers("/auth/login", "/auth/signup", "/css/**", "/js/**").permitAll()
-                // API REST login/signup accessibles à tous
-                .requestMatchers("/api/auth/login", "/api/auth/signup", "/api/auth/refreshtoken").permitAll()
-                // Dashboards selon rôle
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/organisator/**").hasRole("ORGANISATOR")
-                .requestMatchers("/user/**").hasRole("USER")
-                
-                // Toutes les autres requêtes nécessitent authentification
-                .anyRequest().authenticated()
-            )
-            // Form login pour Thymeleaf avec successHandler
-            .formLogin(form -> form
-                .loginPage("/auth/login")
-                .successHandler(successHandler)
-                .permitAll()
-            )
-           /* .logout(logout -> logout
-                .logoutUrl("/auth/logout")
-                .logoutSuccessUrl("/auth/login-form?logout")
-                .permitAll()
-            )*/;
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
+    }
 
-        // Filtre JWT avant le UsernamePasswordAuthenticationFilter
-        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+    // SECURITE GLOBALE
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+        http
+                .csrf(csrf -> csrf.disable())
+
+                // --------------- EXCEPTIONS POUR API ---------------
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(unauthorizedHandler)
+                )
+
+                // --------------- ROUTES AUTORISÉES ---------------
+                .authorizeHttpRequests(auth -> auth
+                        // Public
+                        .requestMatchers("/auth/**", "/css/**", "/js/**", "/images/**").permitAll()
+
+                        // API ouverte pour LOGIN & REGISTER
+                        .requestMatchers("/api/auth/**").permitAll()
+
+                        // API protégée par JWT
+                        .requestMatchers("/api/**").authenticated()
+
+                        // Dashboards Thymeleaf protégés par rôles
+                        .requestMatchers("/user/**").hasRole("USER")
+                        .requestMatchers("/organisator/**").hasRole("ORGANISATOR")
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+
+                        // Tout le reste nécessite une session valide
+                        .anyRequest().authenticated()
+                )
+
+                // --------------- FORM LOGIN (Thymeleaf) ---------------
+                .formLogin(form -> form
+                        .loginPage("/auth/login")
+                        .loginProcessingUrl("/auth/login")
+                        .successHandler(customAuthenticationSuccessHandler)
+                        .failureUrl("/auth/login?error=true")
+                        .permitAll()
+                )
+
+                // --------------- SESSION STATE (pour Thymeleaf) ---------------
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                )
+
+                // --------------- LOGOUT ---------------
+                .logout(logout -> logout
+                        .logoutUrl("/auth/logout")
+                        .logoutSuccessUrl("/auth/login?logout=true")
+                );
+
+        // --------------- FILTRE JWT UNIQUEMENT POUR API ---------------
+        http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

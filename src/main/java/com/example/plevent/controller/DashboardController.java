@@ -13,17 +13,17 @@ public class DashboardController {
         model.addAttribute("username", authentication.getName());
         return "user/dashboard_user";
     }
-
+/*
     @GetMapping("/organisator/dashboard")
     public String organisatorDashboard(Authentication authentication, Model model) {
         model.addAttribute("username", authentication.getName());
-        return "organisator/dashboard_organisator";
+        return "organizer/dashboard_organisator";
     }
-
-    @GetMapping("/admin/dashboard")
+*/
+/*    @GetMapping("/admin/dashboard")
     public String adminDashboard(Authentication authentication, Model model) {
         model.addAttribute("username", authentication.getName());
         return "admin/dashboard_admin";
-    }
+    }*/
 }
 
