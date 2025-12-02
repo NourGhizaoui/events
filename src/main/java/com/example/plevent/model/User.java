@@ -43,6 +43,13 @@ public User(Long id, String username, String email, String password, Set<Role> r
     this.roles = roles;
 }
 
+//🔥 Ajout du constructeur utilisé dans AuthController
+public User(String username, String email, String password) {
+ this.username = username;
+ this.email = email;
+ this.password = password;
+}
+
 // Getters et Setters
 public Long getId() {
     return id;
@@ -93,6 +100,8 @@ public boolean isEnabled() {
 public void setActive(boolean active) {
     this.active = active;
 }
+
+
 
 
 @Transient  // ⚡ Indique à JPA que ce n’est pas une colonne en base
