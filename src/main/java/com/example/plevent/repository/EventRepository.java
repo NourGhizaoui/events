@@ -12,4 +12,6 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
     // Inside com.example.plevent.repository.EventRepository.java
     @Transactional
     void deleteByOrganizerId(Integer organizerId);
+    List<Event> findByStatus(String status);
+
 }

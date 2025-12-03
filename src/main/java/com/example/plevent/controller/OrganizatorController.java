@@ -3,6 +3,7 @@ package com.example.plevent.controller;
 import com.example.plevent.model.Event;
 import com.example.plevent.model.EventStatus;
 import com.example.plevent.model.User;
+import com.example.plevent.repository.CategoryRepository;
 import com.example.plevent.repository.EventRepository;
 import com.example.plevent.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +23,11 @@ public class OrganizatorController {
     private EventRepository eventRepository;
 
     @Autowired
+    private CategoryRepository categoryRepository;
+    
+    
+    @Autowired
     private UserRepository userRepository;
-
     // Dashboard avec liste et statistiques
     @GetMapping("/dashboard")
     public String dashboard(Authentication authentication, Model model) {
@@ -51,6 +55,8 @@ public class OrganizatorController {
     @GetMapping("/event/new")
     public String newEventForm(Model model) {
         model.addAttribute("event", new Event());
+        model.addAttribute("categories", categoryRepository.findAll()); // toutes les catégories existantes
+
         return "organizer/event_form";
     }
 
@@ -70,6 +76,8 @@ public class OrganizatorController {
     public String editEventForm(@PathVariable Integer id, Model model) {
         Event event = eventRepository.findById(id).orElseThrow();
         model.addAttribute("event", event);
+        model.addAttribute("categories", categoryRepository.findAll());
+
         return "organizer/event_form";
     }
 
@@ -79,4 +87,8 @@ public class OrganizatorController {
         eventRepository.deleteById(id);
         return "redirect:/organisator/dashboard";
     }
+    
+    
+    
+    
 }
