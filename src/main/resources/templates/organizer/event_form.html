@@ -3,52 +3,92 @@
 <head>
     <title>Event Form</title>
 
-    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <style>
+        /* Arrière-plan plus professionnel */
         body {
-            background-color: #f4f6f9;
-            font-family: 'Segoe UI', sans-serif;
-            padding-top: 40px;
+            background-color: #eef2f5;
+            font-family: 'Roboto', sans-serif;
+            padding-top: 50px;
         }
 
+        /* Conteneur de Formulaire */
         .form-container {
-            max-width: 700px;
+            max-width: 750px;
             margin: auto;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); /* Ombre plus prononcée */
+            border-left: 5px solid #0d6efd; /* Bordure colorée */
         }
 
-        h1 {
-            text-align: center;
+        /* Titre */
+        .form-container h1 {
             font-weight: 700;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
+            color: #343a40;
+            text-align: left;
+            border-bottom: 2px solid #f8f9fa;
+            padding-bottom: 15px;
         }
 
+        /* Labels et champs */
         label {
             font-weight: 600;
+            color: #495057;
+            margin-bottom: 5px;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 8px;
+            padding: 10px 15px;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+            border-color: #0d6efd;
         }
 
-        .btn-save {
-            background-color: #0d6efd;
+        /* Bouton Enregistrer (Save) */
+        .btn-save-custom {
+            background-color: #28a745; /* Vert pour l'action principale (créer/sauver) */
+            border-color: #28a745;
+            color: white;
+            padding: 10px 25px;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        .btn-save-custom:hover {
+            background-color: #1e7e34;
+            border-color: #1e7e34;
             color: white;
         }
 
-        .btn-save:hover {
-            background-color: #0a58ca;
-        }
-
-        .btn-back {
+        /* Bouton Retour (Back) */
+        .btn-back-custom {
             background-color: #6c757d;
+            border-color: #6c757d;
             color: white;
+            padding: 10px 25px;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out;
         }
 
-        .btn-back:hover {
-            background-color: #565e64;
+        .btn-back-custom:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+            color: white;
         }
+        
+        /* Style pour les icônes dans les labels (non utilisé ici, mais utile pour des améliorations futures) */
+        /* label i {
+            margin-right: 8px;
+            color: #0d6efd;
+        } */
     </style>
 </head>
 
@@ -56,40 +96,43 @@
 
 <div class="form-container">
 
-    <h1 th:text="${event.id == null} ? 'Créer un événement' : 'Éditer l\'événement'"></h1>
+    <h1 th:text="${event.id == null} ? 'Créer un nouvel événement' : 'Éditer l\'événement: ' + ${event.title}"></h1>
 
-    <form th:action="@{/organisator/event/save}" th:object="${event}" method="post">
+    <form th:action="@{/organisator/event/save}" th:object="${event}" method="post" id="eventForm">
 
         <input type="hidden" th:field="*{id}"/>
 
         <div class="mb-3">
-            <label>Title:</label>
-            <input type="text" class="form-control" th:field="*{title}" required/>
+            <label for="titleInput"><i class="fas fa-heading me-2"></i>Title:</label>
+            <input type="text" id="titleInput" class="form-control" th:field="*{title}" required/>
         </div>
 
         <div class="mb-3">
-            <label>Description:</label>
-            <textarea class="form-control" th:field="*{description}" rows="4" required></textarea>
+            <label for="descriptionInput"><i class="fas fa-align-left me-2"></i>Description:</label>
+            <textarea id="descriptionInput" class="form-control" th:field="*{description}" rows="4" required></textarea>
         </div>
 
         <div class="mb-3">
-            <label>Date:</label>
-            <input type="datetime-local" class="form-control" th:field="*{eventDate}" required/>
+            <label for="eventDateInput"><i class="fas fa-calendar-alt me-2"></i>Date:</label>
+            <input type="datetime-local" id="eventDateInput" class="form-control" th:field="*{eventDate}" required/>
+            <div id="dateError" class="invalid-feedback d-none">
+                La date de l'événement ne peut pas être antérieure à la date et heure actuelles.
+            </div>
         </div>
 
         <div class="mb-3">
-            <label>Location:</label>
-            <input type="text" class="form-control" th:field="*{location}" required/>
+            <label for="locationInput"><i class="fas fa-map-marker-alt me-2"></i>Location:</label>
+            <input type="text" id="locationInput" class="form-control" th:field="*{location}" required/>
         </div>
 
         <div class="mb-3">
-            <label>Capacity:</label>
-            <input type="number" class="form-control" th:field="*{capacity}" required/>
+            <label for="capacityInput"><i class="fas fa-users me-2"></i>Capacity:</label>
+            <input type="number" id="capacityInput" class="form-control" th:field="*{capacity}" min="1" required/>
         </div>
 		
 		<div class="mb-3">
-		    <label>Category:</label>
-		    <select class="form-select" th:field="*{category.id}" required>
+		    <label for="categorySelect"><i class="fas fa-tag me-2"></i>Category:</label>
+		    <select id="categorySelect" class="form-select" th:field="*{category.id}" required>
 		        <option value="" disabled>-- Sélectionner une catégorie --</option>
 		        <option th:each="cat : ${categories}" 
 		                th:value="${cat.id}" 
@@ -100,18 +143,13 @@
 		</div>
 
 
-        <div class="mb-3">
-            <label>Status:</label>
-            <select class="form-select" th:field="*{status}">
-                <option th:value="PENDING">PENDING</option>
-                <option th:value="APPROVED">APPROVED</option>
-                <option th:value="CANCELLED">CANCELLED</option>
-            </select>
-        </div>
-
-        <div class="d-flex justify-content-between mt-4">
-            <button type="submit" class="btn btn-save px-4">Save</button>
-            <a href="/organisator/dashboard" class="btn btn-back px-4">Retour au dashboard</a>
+        <div class="d-flex justify-content-between mt-5">
+            <a href="/organisator/dashboard" class="btn btn-back-custom px-5">
+                <i class="fas fa-arrow-left me-2"></i> Retour
+            </a>
+            <button type="submit" class="btn btn-save-custom px-5">
+                <i class="fas fa-save me-2"></i> Save
+            </button>
         </div>
 
     </form>
@@ -119,6 +157,50 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('eventForm');
+        const eventDateInput = document.getElementById('eventDateInput');
+        const dateError = document.getElementById('dateError');
+
+        // Fonction pour formater la date/heure actuelle
+        function getNowString() {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset()); // Ajuster au fuseau horaire local
+            return now.toISOString().slice(0, 16); // Formatter en 'YYYY-MM-DDThh:mm'
+        }
+
+        // Si l'événement est nouveau, empêcher de choisir une date passée
+        if ('[[${event.id}]]' === '') { // Vérifie si c'est une création
+            eventDateInput.min = getNowString();
+        }
+
+        // Validation lors de la soumission du formulaire
+        form.addEventListener('submit', function(event) {
+            const selectedDate = new Date(eventDateInput.value).getTime();
+            const now = new Date().getTime();
+
+            // Vérifier si la date est dans le passé (avec une petite marge)
+            if (selectedDate < now - (60000 * 5) ) { // Permettre 5 minutes de marge pour le traitement
+                event.preventDefault(); // Empêcher la soumission
+                eventDateInput.classList.add('is-invalid');
+                dateError.classList.remove('d-none');
+            } else {
+                eventDateInput.classList.remove('is-invalid');
+                dateError.classList.add('d-none');
+            }
+        });
+        
+        // Supprimer la validation d'erreur quand l'utilisateur change la valeur
+        eventDateInput.addEventListener('change', function() {
+            if (this.classList.contains('is-invalid')) {
+                this.classList.remove('is-invalid');
+                dateError.classList.add('d-none');
+            }
+        });
+    });
+</script>
 
 </body>
 </html>

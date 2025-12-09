@@ -2,150 +2,235 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>User Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        /* Styles de base */
         body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa; /* Arrière-plan plus clair */
             margin: 0;
             padding: 0;
         }
 
-        header {
-            background: #2c3e50;
-            padding: 15px;
+        /* En-tête (Navbar Style) */
+        .navbar-custom {
+            background: linear-gradient(90deg, #007bff 0%, #0056b3 100%); /* Dégradé pour l'en-tête */
+            padding: 1rem 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+        }
+        
+        .navbar-custom h1 {
+            font-size: 1.75rem;
+            margin: 0;
             color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
-        h1 span {
-            font-weight: bold;
+        .navbar-custom h1 span {
+            font-weight: 600;
         }
 
-        .events-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-            padding: 30px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            transition: 0.2s;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-        }
-
-        .card h3 {
-            margin-top: 0;
-            color: #34495e;
-        }
-
-        .card p {
-            color: #555;
-        }
-
+        /* Bouton de déconnexion */
         .btn-logout {
-            background: #e74c3c;
+            background-color: #dc3545; /* Rouge Bootstrap */
             color: white;
-            padding: 8px 12px;
-            border-radius: 5px;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
             text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.2s ease-in-out;
+            border: none;
         }
 
         .btn-logout:hover {
-            background: #c0392b;
+            background-color: #c82333;
+            color: white;
+        }
+        
+        /* Conteneur d'événements */
+        .events-grid {
+            padding: 2rem 0;
+        }
+
+        /* Carte d'événement */
+        .card-custom {
+            background: white;
+            border: none; /* Supprimer la bordure par défaut de Bootstrap */
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            height: 100%; /* Assure que toutes les cartes ont la même hauteur */
+        }
+
+        .card-custom:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .card-custom h3 {
+            color: #007bff;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 0.5rem;
+        }
+        
+        .card-custom p {
+            font-size: 0.95rem;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+        
+        .card-custom p strong {
+            color: #343a40;
+        }
+        
+        .card-body-custom {
+            padding: 1.5rem;
+        }
+        
+        .card-description {
+            max-height: 4.5em; /* Limite la description à 3 lignes */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+        
+        /* Style pour les icônes */
+        .card-custom i {
+            margin-right: 8px;
+            color: #007bff;
+        }
+        
+        /* Titre de section */
+        .section-title {
+            color: #343a40;
+            font-weight: 300;
+            margin-bottom: 1.5rem;
+            padding-top: 1rem;
         }
     </style>
 </head>
 <body>
+	<header class="navbar-custom d-flex justify-content-between align-items-center px-4 py-3">
+	    <div class="welcome-box">
+	        <h1 class="welcome-title">
+	            👋 Bonjour,
+	            <span class="username" th:text="${username}">User</span>
+	        </h1>
+	        <p class="welcome-subtitle">Heureux de vous revoir !</p>
+	    </div>
 
-<header>
-    <h1>Welcome, <span th:text="${username}">User</span> 👋</h1>
-    <a href="/auth/logout" class="btn-logout">Logout</a>
-</header>
+	    <a href="/auth/logout" class="btn-logout">
+	        <i class="fas fa-sign-out-alt"></i>
+	        <span>Déconnexion</span>
+	    </a>
+	</header>
 
-<h2 style="padding-left:30px;">Approved Events</h2>
-
-<!-- Filtrage par catégorie -->
-<div style="padding-left:30px; margin-bottom:20px;">
-    <label for="categoryFilter"><strong>Filtrer par catégorie:</strong></label>
-    <select id="categoryFilter" class="form-select" style="width:200px; display:inline-block; margin-left:10px;">
-        <option value="all">Toutes</option>
-        <option th:each="cat : ${categories}" th:value="${cat.name}" th:text="${cat.name}"></option>
-    </select>
+<div class="container mt-4">
+    <h2 class="section-title">Événements </h2>
 </div>
 
-<div class="events-container">
+<div class="container mb-4">
+    <div class="row align-items-center">
+        <div class="col-auto">
+            <label for="categoryFilter" class="col-form-label">
+                <i class="fas fa-filter"></i> <strong>Filtrer par catégorie:</strong>
+            </label>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <select id="categoryFilter" class="form-select">
+                <option value="all">Toutes</option>
+                <option th:each="cat : ${categories}" th:value="${cat.name}" th:text="${cat.name}"></option>
+            </select>
+        </div>
+    </div>
+</div>
 
-    <div class="card" th:each="event, iterStat : ${approvedEvents}" th:attr="data-category=${event.category.name}">
-        <h3 th:text="${event.title}">Event Title</h3>
-        <p>
-            <strong>Date:</strong>
-            <span th:text="${#temporals.format(event.eventDate, 'yyyy-MM-dd HH:mm')}">2025-12-03 10:00</span>
-        </p>
-        <p><strong>Location:</strong> <span th:text="${event.location}">City</span></p>
-        <p><strong>Description:</strong></p>
-        <p th:text="${event.description}">Event description...</p>
-        <p><strong>Catégorie :</strong> <span th:text="${event.category.name}">Category Name</span></p>
+<div class="container events-grid">
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
 
-        <!-- Bouton View Details -->
-        <button type="button"
-                class="btn btn-primary"
-                data-bs-toggle="modal"
-                th:data-bs-target="${'#eventModal' + iterStat.index}">
-            Voir
-        </button>
+        <div class="col" th:each="event, iterStat : ${approvedEvents}">
+            <div class="card card-custom h-100" th:attr="data-category=${event.category.name}">
+                <div class="card-body card-body-custom d-flex flex-column">
+                    <h3 class="card-title" th:text="${event.title}">Event Title</h3>
+                    <p class="card-text">
+                        <i class="far fa-calendar-alt"></i> <strong>Date:</strong>
+                        <span th:text="${#temporals.format(event.eventDate, 'yyyy-MM-dd HH:mm')}">2025-12-03 10:00</span>
+                    </p>
+                    <p class="card-text">
+                        <i class="fas fa-map-marker-alt"></i> <strong>Location:</strong> <span th:text="${event.location}">City</span>
+                    </p>
+                    <p class="card-text">
+                        <i class="fas fa-tag"></i> <strong>Catégorie :</strong> <span th:text="${event.category.name}">Category Name</span>
+                    </p>
+                    <p class="card-text mt-2"><strong>Description:</strong></p>
+                    <p class="card-text card-description mb-3" th:text="${event.description}">Event description...</p>
+    
+                    <div class="mt-auto"> <button type="button"
+                                class="btn btn-primary w-100"
+                                data-bs-toggle="modal"
+                                th:data-bs-target="${'#eventModal' + iterStat.index}">
+                            <i class="fas fa-eye"></i> Voir les détails
+                        </button>
+                    </div>
 
-        <!-- Modal -->
-        <div class="modal fade" th:id="${'eventModal' + iterStat.index}" tabindex="-1" aria-hidden="true">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" th:text="${event.title}">Event Title</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                <p><strong>Date:</strong> <span th:text="${#temporals.format(event.eventDate, 'yyyy-MM-dd HH:mm')}"></span></p>
-                <p><strong>Location:</strong> <span th:text="${event.location}"></span></p>
-                <p><strong>Status:</strong> <span th:text="${event.status}"></span></p>
-                <p><strong>Description:</strong> <span th:text="${event.description}"></span></p>
-                <p><strong>Catégorie :</strong> <span th:text="${event.category.name}"></span></p>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              </div>
+                    <div class="modal fade" th:id="${'eventModal' + iterStat.index}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header bg-primary text-white">
+                                    <h5 class="modal-title" th:text="${event.title}">Event Title</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p><strong><i class="far fa-calendar-alt"></i> Date:</strong> <span th:text="${#temporals.format(event.eventDate, 'yyyy-MM-dd HH:mm')}"></span></p>
+                                    <p><strong><i class="fas fa-map-marker-alt"></i> Location:</strong> <span th:text="${event.location}"></span></p>
+                                    <p><strong><i class="fas fa-tag"></i> Catégorie :</strong> <span th:text="${event.category.name}"></span></p>
+                                    <hr>
+                                    <p class="mb-0"><strong><i class="fas fa-info-circle"></i> Description:</strong></p>
+                                    <p th:text="${event.description}"></p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
-          </div>
         </div>
 
     </div>
-
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Script filtrage par catégorie -->
 <script>
     const filter = document.getElementById('categoryFilter');
-    const cards = document.querySelectorAll('.card');
+    const cards = document.querySelectorAll('.card-custom');
 
     filter.addEventListener('change', () => {
         const selected = filter.value;
 
         cards.forEach(card => {
+            // Utilisez le sélecteur parent pour trouver l'élément 'col' et le masquer
+            const col = card.closest('.col');
             const cat = card.getAttribute('data-category');
             if (selected === 'all' || cat === selected) {
-                card.style.display = 'block';
+                if (col) {
+                    col.style.display = 'block';
+                } else {
+                    card.style.display = 'block';
+                }
             } else {
-                card.style.display = 'none';
+                if (col) {
+                    col.style.display = 'none';
+                } else {
+                    card.style.display = 'none';
+                }
             }
         });
     });

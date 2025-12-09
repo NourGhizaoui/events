@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="admin/layout_admin :: layout(~{::body})">
+
+<body>
+
+<div th:fragment="content">
+
+    <h2>Events Management</h2>
+
+    <table class="table table-striped mt-3">
+        <thead>
+        <tr>
+            <th>Title</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="e : ${events}">
+            <td th:text="${e.title}"></td>
+            <td th:text="${#temporals.format(e.eventDate, 'yyyy-MM-dd HH:mm')}"></td>
+            <td th:text="${e.status}"></td>
+
+            <td>
+                <form th:action="@{'/admin/event/' + ${e.id} + '/approve'}" method="post">
+                    <button class="btn btn-success btn-sm">Approve</button>
+                </form>
+
+                <form th:action="@{'/admin/event/' + ${e.id} + '/cancel'}" method="post" class="mt-1">
+                    <button class="btn btn-danger btn-sm">Refuse</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+</body>
+</html>

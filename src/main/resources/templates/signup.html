@@ -3,38 +3,88 @@
 <head>
     <title>Sign Up</title>
 
-    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <style>
+        /* Arrière-plan stylisé (similaire à la page Login) */
         body {
-            background: #f5f5f5;
+            /* Dégradé de fond bleu-vert */
+            background: linear-gradient(135deg, #28a745 0%, #8de9a9 100%);
             height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Roboto', sans-serif;
         }
+        
+        /* Conteneur de la carte d'inscription */
         .signup-card {
-            width: 420px;
-            border-radius: 12px;
-            padding: 30px;
-            background: white;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+            width: 450px;
+            max-width: 95%; 
+            border-radius: 16px;
+            padding: 40px;
+            background: #ffffff;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
         }
+        
         .signup-card h2 {
-            font-weight: bold;
-            margin-bottom: 25px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: #28a745; /* Couleur de titre en Vert Succès */
             text-align: center;
+            font-size: 2rem;
         }
-        .signup-card button {
+        
+        /* Champs de formulaire */
+        .form-control, .form-select {
+            border-radius: 8px;
+            padding: 12px 15px;
+            border: 1px solid #ced4da;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #28a745;
+            box-shadow: 0 0 0 0.25rem rgba(40, 167, 69, 0.25);
+        }
+        
+        .form-label {
+            font-weight: 500;
+            color: #495057;
+        }
+
+        /* Bouton d'inscription */
+        .btn-signup-custom {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            background-color: #28a745; /* Vert Succès */
+            border-color: #28a745;
+            transition: background-color 0.2s ease-in-out;
         }
+        .btn-signup-custom:hover {
+            background-color: #1e7e34;
+            border-color: #1e7e34;
+        }
+        
+        /* Texte de pied de page */
         .footer-text {
             text-align: center;
-            margin-top: 15px;
+            margin-top: 20px;
+            color: #6c757d;
         }
+        .footer-text a {
+            font-weight: 600;
+            text-decoration: none;
+            color: #007bff !important; /* Maintient le lien en bleu pour le contraste */
+        }
+        .footer-text a:hover {
+            text-decoration: underline;
+        }
+
     </style>
 </head>
 
@@ -42,50 +92,83 @@
 
 <div class="signup-card">
 
-    <h2>Create Account</h2>
+    <h2><i class="fas fa-user-plus me-2"></i> Créer un Compte</h2>
 
-    <!-- Alerts -->
-    <div th:if="${error}" class="alert alert-danger text-center">[[${error}]]</div>
-    <div th:if="${message}" class="alert alert-success text-center">[[${message}]]</div>
+    <div th:if="${error}" class="alert alert-danger text-center">
+        <i class="fas fa-exclamation-circle me-1"></i> [[${error}]]
+    </div>
+    <div th:if="${message}" class="alert alert-success text-center">
+        <i class="fas fa-check-circle me-1"></i> [[${message}]]
+    </div>
 
-    <!-- Form -->
-    <form th:action="@{/auth/signup}" method="post">
+    <form th:action="@{/auth/signup}" method="post" id="signupForm">
 
         <div class="mb-3">
-            <label class="form-label">Username</label>
-            <input type="text" name="username" class="form-control" placeholder="Enter username" required>
+            <label for="usernameInput" class="form-label"><i class="fas fa-user me-2"></i>Username</label>
+            <input type="text" id="usernameInput" name="username" class="form-control" placeholder="Entrez votre nom d'utilisateur" required>
         </div>
 
         <div class="mb-3">
-            <label class="form-label">Email</label>
-            <input type="email" name="email" class="form-control" placeholder="Enter email" required>
+            <label for="emailInput" class="form-label"><i class="fas fa-envelope me-2"></i>Email</label>
+            <input type="email" id="emailInput" name="email" class="form-control" placeholder="Entrez votre email" required>
         </div>
 
         <div class="mb-3">
-            <label class="form-label">Password</label>
-            <input type="password" name="password" class="form-control" placeholder="Enter password" required>
+            <label for="passwordInput" class="form-label"><i class="fas fa-key me-2"></i>Password</label>
+            <input type="password" id="passwordInput" name="password" class="form-control" placeholder="Minimum 6 caractères" required>
+            <div id="passwordError" class="invalid-feedback d-none">
+                Le mot de passe doit contenir au moins 6 caractères.
+            </div>
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">Select Role</label>
-            <select name="role" class="form-select">
-                <option value="user">User</option>
+        <div class="mb-4">
+            <label for="roleSelect" class="form-label"><i class="fas fa-user-tag me-2"></i>Select Role</label>
+            <select id="roleSelect" name="role" class="form-select">
+                <option value="user">User (Participant)</option>
                 <option value="organisator">Organisator</option>
             </select>
         </div>
 
-        <button class="btn btn-primary" type="submit">Sign Up</button>
+        <button class="btn btn-signup-custom" type="submit">S'inscrire</button>
 
     </form>
 
     <p class="footer-text">
-        Already have an account?
-        <a th:href="@{/auth/login}" class="text-primary fw-semibold">Login</a>
+        Vous avez déjà un compte ?
+        <a th:href="@{/auth/login}">Connectez-vous ici</a>
     </p>
 
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('signupForm');
+        const passwordInput = document.getElementById('passwordInput');
+        const passwordError = document.getElementById('passwordError');
+        const MIN_LENGTH = 6; // Longueur minimale requise
+
+        form.addEventListener('submit', function(event) {
+            if (passwordInput.value.length < MIN_LENGTH) {
+                event.preventDefault(); // Empêcher la soumission
+                passwordInput.classList.add('is-invalid');
+                passwordError.classList.remove('d-none');
+            } else {
+                passwordInput.classList.remove('is-invalid');
+                passwordError.classList.add('d-none');
+            }
+        });
+        
+        // Supprimer la validation d'erreur quand l'utilisateur tape
+        passwordInput.addEventListener('input', function() {
+            if (this.value.length >= MIN_LENGTH && this.classList.contains('is-invalid')) {
+                this.classList.remove('is-invalid');
+                passwordError.classList.add('d-none');
+            }
+        });
+    });
+</script>
 
 </body>
 </html>

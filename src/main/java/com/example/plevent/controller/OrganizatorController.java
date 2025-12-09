@@ -61,14 +61,39 @@ public class OrganizatorController {
     }
 
     // Sauvegarder création / édition
-    @PostMapping("/event/save")
+   /* @PostMapping("/event/save")
     public String saveEvent(@ModelAttribute Event event, Authentication authentication) {
         User organizer = userRepository.findByUsername(authentication.getName())
                                        .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
         event.setOrganizer(organizer);
         eventRepository.save(event);
         return "redirect:/organisator/dashboard";
+    }*/
+    
+    
+    @PostMapping("/event/save")
+    public String saveEvent(@ModelAttribute Event event, Authentication authentication) {
+
+        User organizer = userRepository.findByUsername(authentication.getName())
+                                       .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+        event.setOrganizer(organizer);
+
+        // Si nouvel événement → status = PENDING
+        if (event.getId() == null) {
+            event.setStatus(EventStatus.PENDING);
+        } else {
+            // Si édition, garder le status actuel depuis la DB
+            Event existing = eventRepository.findById(event.getId())
+                                            .orElseThrow(() -> new RuntimeException("Événement introuvable"));
+            event.setStatus(existing.getStatus());
+        }
+
+        eventRepository.save(event);
+        return "redirect:/organisator/dashboard";
     }
+
+    
 
 
     // Éditer événement

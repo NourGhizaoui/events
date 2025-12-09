@@ -1,7 +1,10 @@
 package com.example.plevent.controller;
 
+import com.example.plevent.model.Event;
+import com.example.plevent.model.EventStatus;
 import com.example.plevent.model.User;
 import com.example.plevent.repository.UserRepository;
+import com.example.plevent.repository.EventRepository;
 import com.example.plevent.repository.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -19,6 +22,9 @@ public class AdminController {
 
     @Autowired
     private RoleRepository roleRepository;
+    @Autowired
+    private EventRepository eventRepository;
+
 
     // Dashboard admin
     @GetMapping("/dashboard")
@@ -48,6 +54,9 @@ public class AdminController {
         model.addAttribute("totalUsers", totalUsers);
         model.addAttribute("organisators", organisators);
         model.addAttribute("normalUsers", normalUsers);
+        
+        model.addAttribute("events", eventRepository.findAll());
+
 
         return "admin/dashboard_admin";
     }
@@ -69,5 +78,44 @@ public class AdminController {
     }
 
 
+    
+    
+    @PostMapping("/event/{id}/approve")
+    public String approveEvent(@PathVariable Integer id) {
+        Event event = eventRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Event not found"));
+        event.setStatus(EventStatus.APPROVED);
+        eventRepository.save(event);
+        return "redirect:/admin/dashboard";
+    }
+
+    @PostMapping("/event/{id}/cancel")
+    public String cancelEvent(@PathVariable Integer id) {
+        Event event = eventRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Event not found"));
+        event.setStatus(EventStatus.REFUSED);
+        eventRepository.save(event);
+        return "redirect:/admin/dashboard";
+    }
+    
+    
+    
+    // PAGE LISTE EVENTS
+    // =======================
+    @GetMapping("/events")
+    public String eventsPage(Model model) {
+        model.addAttribute("events", eventRepository.findAll());
+        return "admin/events_admin";
+    }
+    
+    
+    
+    @GetMapping("/users")
+    public String usersPage(Model model) {
+        model.addAttribute("users", userRepository.findAll());
+        return "admin/users";
+    }
+
+    
     
 }
